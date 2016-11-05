@@ -2,7 +2,7 @@ extern crate cryptopals;
 
 #[cfg(test)]
 mod tests {
-    use cryptopals::set_01::{ challenge_01, challenge_02 };
+    use cryptopals::set_01::{ challenge_01, challenge_02, challenge_03 };
 
     #[test]
     fn hex_to_base64 () {
@@ -24,7 +24,8 @@ mod tests {
 
     #[test]
     fn single_byte_xor_cipher () {
-        let key = challenge_03::single_byte_xor_cipher("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736");
-        assert_eq!();
+        let chi2_list = challenge_03::single_byte_xor_cipher("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736");
+        assert_eq!(chi2_list[0].text, "Cooking MC\'s like a pound of bacon");
+        assert_eq!(chi2_list[0].key, 88);
     }
 }
