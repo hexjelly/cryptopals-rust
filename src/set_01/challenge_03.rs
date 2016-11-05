@@ -17,7 +17,7 @@ const LETTER_FREQUENCY: [f32; 26] = [
     0.07507, 0.01929, 0.00095, 0.05987, 0.06327, 0.09056, 0.02758,
     0.00978, 0.02360, 0.00150, 0.01974, 0.00074];
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Chi2Result<'a> {
     pub text: String,
     pub key: u8,
@@ -38,7 +38,7 @@ pub fn chi2 (text: String, key: u8, hex: &str) -> Chi2Result {
         else { return Chi2Result { text: text.clone(), key: key, chi2: f32_max, hex: hex }; }
     }
 
-    let length = text.len() - ignored;
+    let length = text.len() + ignored * 5;
     let mut result = Chi2Result { text: text, key: key, chi2: 0_f32, hex: hex };
 
     for n in 0..26 {
@@ -54,7 +54,8 @@ pub fn chi2 (text: String, key: u8, hex: &str) -> Chi2Result {
 pub fn single_byte_xor_cipher (hex: &str) -> Vec<Chi2Result> {
     let mut analysis: Vec<Chi2Result> = vec![];
     let hex_decoded = hex::decode(hex.to_string().to_uppercase().as_bytes()).unwrap();
-    for n in (65..91).chain(97..123) {
+    for n in 32..127 {
+    // for n in (65..91).chain(97..123) {
         let mut test = hex_decoded.clone();
         for b in test.as_mut_slice() {
             *b ^= n;
