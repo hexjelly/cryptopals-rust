@@ -1,0 +1,7 @@
+[package]
+name = "set_01"
+version = "0.1.0"
+authors = ["Roger Andersen <hexjelly@hexjelly.com>"]
+
+[dependencies]
+data-encoding = "1.1.2"
