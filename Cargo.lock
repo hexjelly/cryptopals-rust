@@ -1,5 +1,5 @@
 [root]
-name = "set_01"
+name = "cryptopals"
 version = "0.1.0"
 dependencies = [
  "data-encoding 1.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
