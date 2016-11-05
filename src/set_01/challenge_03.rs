@@ -18,14 +18,15 @@ const LETTER_FREQUENCY: [f32; 26] = [
     0.00978, 0.02360, 0.00150, 0.01974, 0.00074];
 
 #[derive(Debug, PartialEq)]
-pub struct Chi2Result {
+pub struct Chi2Result<'a> {
     pub text: String,
     pub key: u8,
-    pub chi2: f32
+    pub chi2: f32,
+    pub hex: &'a str
 }
 
 
-pub fn chi2 (text: String, key: u8) -> Chi2Result {
+pub fn chi2 (text: String, key: u8, hex: &str) -> Chi2Result {
     let mut count = [0;26];
     let mut ignored = 0;
 
@@ -34,11 +35,11 @@ pub fn chi2 (text: String, key: u8) -> Chi2Result {
         else if *byte >= 97_u8 && *byte <= 122_u8 { count[(byte - 97) as usize] += 1 }
         else if *byte >= 32_u8 && *byte <= 126_u8 { ignored += 1 }
         else if *byte == 9_u8 || *byte == 10_u8 || *byte == 13_u8 { ignored += 1 }
-        else { return Chi2Result { text: text.clone(), key: key, chi2: f32_max }; }
+        else { return Chi2Result { text: text.clone(), key: key, chi2: f32_max, hex: hex }; }
     }
 
     let length = text.len() - ignored;
-    let mut result = Chi2Result { text: text, key: key, chi2: 0_f32 };
+    let mut result = Chi2Result { text: text, key: key, chi2: 0_f32, hex: hex };
 
     for n in 0..26 {
         let found = count[n];
@@ -59,7 +60,7 @@ pub fn single_byte_xor_cipher (hex: &str) -> Vec<Chi2Result> {
             *b ^= n;
         }
         let string = String::from_utf8(test);
-        if string.is_ok() { analysis.push(chi2(string.unwrap(), n as u8)); }
+        if string.is_ok() { analysis.push(chi2(string.unwrap(), n as u8, hex)); }
     }
     analysis.sort_by(|a, b| a.chi2.partial_cmp(&b.chi2).unwrap_or(Ordering::Equal));
     analysis
