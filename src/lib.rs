@@ -3,7 +3,6 @@ extern crate data_encoding;
 use data_encoding::hex;
 use data_encoding::base64;
 use std::cmp::Ordering;
-use std::f32::MAX as f32_max;
 
 pub fn hex_to_base64 (input_hex: &str) -> String {
     let hex_decoded = hex::decode(input_hex.to_string().to_uppercase().as_bytes()).unwrap();
@@ -48,7 +47,7 @@ pub fn chi2 (text: String, key: u8, hex: &str) -> Chi2Result {
         else if *byte >= 97_u8 && *byte <= 122_u8 { count[(byte - 97) as usize] += 1 }
         else if *byte >= 32_u8 && *byte <= 126_u8 { ignored += 1 }
         else if *byte == 9_u8 || *byte == 10_u8 || *byte == 13_u8 { ignored += 1 }
-        else { return Chi2Result { text: text.clone(), key: key, chi2: f32_max, hex: hex }; }
+        else { ignored += 1 }
     }
 
     let length = text.len() + ignored * 5;
