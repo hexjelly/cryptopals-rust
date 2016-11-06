@@ -1,12 +1,64 @@
+extern crate cryptopals;
+
+use cryptopals::*;
+use std::cmp::Ordering;
+
+// Convert hex to base64
+// The string:
+//  49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d
+// Should produce:
+//  SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t
+#[test]
+fn hex_to_base64_returns_correct_base64_value () {
+    let test = hex_to_base64("49276d206b696c6c696e6720796f757220627261696e206c696b65206120706f69736f6e6f7573206d757368726f6f6d");
+    assert_eq!(test, "SSdtIGtpbGxpbmcgeW91ciBicmFpbiBsaWtlIGEgcG9pc29ub3VzIG11c2hyb29t");
+}
+
+// Fixed XOR
+// Write a function that takes two equal-length buffers and produces their XOR combination.
+//
+// If your function works properly, then when you feed it the string:
+//  1c0111001f010100061a024b53535009181c
+// ... after hex decoding, and when XOR'd against:
+//  686974207468652062756c6c277320657965
+// ... should produce:
+//  746865206b696420646f6e277420706c6179
+#[test]
+fn fixed_xor_returns_correct_hex_value () {
+    let test = fixed_xor("1c0111001f010100061a024b53535009181c", "686974207468652062756c6c277320657965");
+    assert_eq!(test, "746865206b696420646f6e277420706c6179".to_string().to_uppercase());
+}
+
+#[test]
+#[should_panic]
+fn fixed_xor_panics_on_uneven_input () {
+    let _test = fixed_xor("1c1c", "efa0c1");
+}
+
+// Single-byte XOR cipher
+// The hex encoded string:
+//     1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736
+// ... has been XOR'd against a single character. Find the key, decrypt the message.
+//
+// You can do this by hand. But don't: write code to do it for you.
+//
+// How? Devise some method for "scoring" a piece of English plaintext. Character frequency is a good metric. Evaluate each output and choose the one with the best score.
+#[test]
+fn find_single_byte_xor_cipher_returns_correct_value () {
+    if let Some(chi2_list) = find_single_byte_xor_cipher("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736") {
+        assert_eq!(chi2_list.text, "Cooking MC\'s like a pound of bacon");
+        assert_eq!(chi2_list.key, 88);
+    } else {
+        assert!(false);
+    }
+}
+
 // Detect single-character XOR
 // One of the 60-character strings in this file has been encrypted by single-character XOR.
 //
 // Find it.
 //
 // (Your code from #3 should help.)
-use super::challenge_03::{ Chi2Result, single_byte_xor_cipher };
-use std::cmp::Ordering;
-
 pub const CONTENT: [&'static str; 327] = ["0e3647e8592d35514a081243582536ed3de6734059001e3f535ce6271032",
     "334b041de124f73c18011a50e608097ac308ecee501337ec3e100854201d",
     "40e127f51c10031d0133590b1e490f3514e05a54143d08222c2a4071e351",
@@ -335,12 +387,27 @@ pub const CONTENT: [&'static str; 327] = ["0e3647e8592d35514a081243582536ed3de67
     "4c071a57e9356ee415103c5c53e254063f2019340969e30a2e381d5b2555",
     "32042f46431d2c44607934ed180c1028136a5f2b26092e3b2c4e2930585a"];
 
-pub fn detect_single_char_xor<'a> (hashes: &[&'static str]) -> Vec<Chi2Result<'a>> {
+fn detect_single_char_xor<'a> (hashes: &[&'static str]) -> Option<Chi2Result<'a>> {
     let mut result: Vec<Chi2Result> = vec!();
     for hash in hashes {
-        let hash_list = single_byte_xor_cipher(hash);
-        if hash_list.len() > 0 { result.push(hash_list[0].clone()); }
+        if let Some(best_match) = find_single_byte_xor_cipher(hash) {
+            result.push(best_match);
+        }
     }
-    result.sort_by(|a, b| a.chi2.partial_cmp(&b.chi2).unwrap_or(Ordering::Equal));
-    result
+    if !result.is_empty() {
+        result.sort_by(|a, b| a.chi2.partial_cmp(&b.chi2).unwrap_or(Ordering::Equal));
+        return Some(result[0].clone());
+    }
+    None
+}
+
+#[test]
+fn detect_single_char_xor_returns_correct_value () {
+    if let Some(chi2_list) = detect_single_char_xor(&CONTENT) {
+        assert_eq!(chi2_list.text, "Now that the party is jumping\n");
+        assert_eq!(chi2_list.hex, "7b5a4215415d544115415d5015455447414c155c46155f4058455c5b523f");
+        assert_eq!(chi2_list.key, 53);
+    } else {
+        assert!(false);
+    }
 }
