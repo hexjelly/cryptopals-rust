@@ -75,9 +75,9 @@ pub fn find_single_byte_xor_cipher (hex: &str) -> Option<Chi2Result> {
         let string = String::from_utf8(test);
         if string.is_ok() { analysis.push(chi2(string.unwrap(), n as u8, hex)); }
     }
-    if !analysis.is_empty() {
-        analysis.sort_by(|a, b| a.chi2.partial_cmp(&b.chi2).unwrap_or(Ordering::Equal));
-        return Some(analysis[0].clone());
+    if analysis.is_empty() {
+        return None;
     }
-    None
+    analysis.sort_by(|a, b| a.chi2.partial_cmp(&b.chi2).unwrap_or(Ordering::Equal));
+    return Some(analysis[0].clone());
 }

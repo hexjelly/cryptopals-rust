@@ -394,11 +394,11 @@ fn detect_single_char_xor<'a> (hashes: &[&'static str]) -> Option<Chi2Result<'a>
             result.push(best_match);
         }
     }
-    if !result.is_empty() {
-        result.sort_by(|a, b| a.chi2.partial_cmp(&b.chi2).unwrap_or(Ordering::Equal));
-        return Some(result[0].clone());
+    if result.is_empty() {
+        return None;
     }
-    None
+    result.sort_by(|a, b| a.chi2.partial_cmp(&b.chi2).unwrap_or(Ordering::Equal));
+    return Some(result[0].clone());
 }
 
 #[test]
