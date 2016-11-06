@@ -398,7 +398,7 @@ fn detect_single_char_xor<'a> (hashes: &[&'static str]) -> Option<Chi2Result<'a>
         return None;
     }
     result.sort_by(|a, b| a.chi2.partial_cmp(&b.chi2).unwrap_or(Ordering::Equal));
-    return Some(result[0].clone());
+    return Some(result.remove(0));
 }
 
 #[test]
@@ -424,3 +424,8 @@ fn detect_single_char_xor_returns_correct_value () {
 //  0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272
 //  a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f
 // Encrypt a bunch of stuff using your repeating-key XOR function. Encrypt your mail. Encrypt your password file. Your .sig file. Get a feel for it. I promise, we aren't wasting your time with this.
+
+#[test]
+fn repeating_key_xor_returns_correct_value () {
+    assert!(false);
+}

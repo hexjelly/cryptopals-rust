@@ -78,5 +78,5 @@ pub fn find_single_byte_xor_cipher (hex: &str) -> Option<Chi2Result> {
         return None;
     }
     analysis.sort_by(|a, b| a.chi2.partial_cmp(&b.chi2).unwrap_or(Ordering::Equal));
-    return Some(analysis[0].clone());
+    return Some(analysis.remove(0));
 }
