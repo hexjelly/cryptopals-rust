@@ -78,3 +78,12 @@ pub fn find_single_byte_xor_cipher (hex: &str) -> Option<Chi2Result> {
     analysis.sort_by(|a, b| a.chi2.partial_cmp(&b.chi2).unwrap_or(Ordering::Equal));
     return Some(analysis.remove(0));
 }
+
+pub fn repeating_key_xor (data: &str, key: &str) -> String {
+    let mut result = Vec::new();
+    let mut key_iter = key.as_bytes().iter().cycle();
+    for b in data.as_bytes() {
+        result.push(b ^ *key_iter.next().unwrap());
+    }
+    hex::encode(&result)
+}
