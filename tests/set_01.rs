@@ -77,7 +77,8 @@ fn detect_single_char_xor<'a> (hashes: &[&'static str]) -> Option<Chi2Result<'a>
     }
     if result.is_empty() { return None; }
     result.sort_by(|a, b| a.chi2.partial_cmp(&b.chi2).unwrap_or(Ordering::Equal));
-    return Some(result.remove(0));
+
+    Some(result.remove(0))
 }
 
 #[test]
@@ -105,7 +106,7 @@ fn detect_single_char_xor_returns_correct_value () {
 // Encrypt a bunch of stuff using your repeating-key XOR function. Encrypt your mail. Encrypt your password file. Your .sig file. Get a feel for it. I promise, we aren't wasting your time with this.
 #[test]
 fn repeating_key_xor_returns_correct_value () {
-    let test = repeating_key_xor("Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal".as_bytes(), "ICE".as_bytes());
+    let test = repeating_key_xor(b"Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal", b"ICE");
     assert_eq!(hex::encode(&test), "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272\
             a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f".to_string().to_uppercase());
 }
@@ -130,7 +131,7 @@ fn repeating_key_xor_returns_correct_value () {
 // For each block, the single-byte XOR key that produces the best looking histogram is the repeating-key XOR key byte for that block. Put them together and you have the key.
 #[test]
 fn hamming_distance_returns_correct_value () {
-    let result = hamming_distance("this is a test".as_bytes(), "wokka wokka!!!".as_bytes()).unwrap();
+    let result = hamming_distance(b"this is a test", b"wokka wokka!!!").unwrap();
     assert_eq!(result, 37);
 }
 
