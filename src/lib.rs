@@ -29,15 +29,15 @@ const LETTER_FREQUENCY: [f32; 26] = [
     0.00978, 0.02360, 0.00150, 0.01974, 0.00074];
 
 #[derive(Debug, PartialEq, Clone)]
-pub struct Chi2Result<'a> {
+pub struct Chi2Result {
     pub text: String,
     pub key: u8,
     pub chi2: f32,
-    pub hex: &'a str
+    pub data: Vec<u8>
 }
 
 
-pub fn chi2 (text: String, key: u8, hex: &str) -> Chi2Result {
+pub fn chi2 (text: &str) -> f32 {
     let mut count = [0;26];
     let mut ignored = 0;
 
@@ -50,32 +50,39 @@ pub fn chi2 (text: String, key: u8, hex: &str) -> Chi2Result {
     }
 
     let length = text.len() + ignored * 5;
-    let mut result = Chi2Result { text: text, key: key, chi2: 0_f32, hex: hex };
+    let mut result = 0.;
 
     for n in 0..26 {
         let found = count[n];
         let expected = length as f32 * LETTER_FREQUENCY[n];
         let diff = found as f32 - expected;
-        result.chi2 += diff * diff / expected;
+        result += diff * diff / expected;
     }
 
     result
 }
 
-pub fn find_single_byte_xor_cipher (hex: &str) -> Option<Chi2Result> {
+pub fn find_single_byte_xor_cipher (input: &[u8]) -> Option<Chi2Result> {
     let mut analysis = Vec::new();
-    let hex_decoded = hex::decode(hex.to_string().to_uppercase().as_bytes()).unwrap();
     for n in 32..127 {
-        let mut test = hex_decoded.clone();
-        for b in test.as_mut_slice() {
+        let mut tmp = input.to_vec();
+        for b in tmp.iter_mut() {
             *b ^= n;
         }
-        let string = String::from_utf8(test);
-        if string.is_ok() { analysis.push(chi2(string.unwrap(), n as u8, hex)); }
+        let string = String::from_utf8(tmp);
+        if string.is_ok() {
+            let string = string.unwrap();
+            analysis.push(Chi2Result {
+                text: string.clone(),
+                key: n,
+                chi2: chi2(&string),
+                data: input.to_vec()
+            });
+        }
     }
     if analysis.is_empty() { return None; }
     analysis.sort_by(|a, b| a.chi2.partial_cmp(&b.chi2).unwrap_or(Ordering::Equal));
-    
+
     Some(analysis.remove(0))
 }
 
@@ -101,10 +108,33 @@ pub fn hamming_distance (a: &[u8], b: &[u8]) -> Option<usize> {
     Some(result)
 }
 
-pub fn break_repeating_key_xor (cipher: &[u8], min_key_len: usize, max_key_len: usize) -> Vec<u8> {
-    let result = vec!();
-    for _ in min_key_len..max_key_len+1 {
-
+pub fn break_repeating_key_xor (cipher: &[u8], min_key_len: usize, max_key_len: usize) -> Vec<(usize, usize)> {
+    // For each KEYSIZE, take the first KEYSIZE worth of bytes, and the second KEYSIZE worth of bytes,
+    // and find the edit distance between them. Normalize this result by dividing by KEYSIZE.
+    let mut tmp = vec!();
+    for n in min_key_len..max_key_len+1 {
+        let distance = (n, hamming_distance(&cipher[0..n], &cipher[n..n * 2]).unwrap() / n);
+        tmp.push(distance);
     }
-    result
+    // The KEYSIZE with the smallest normalized edit distance is probably the key.
+    // You could proceed perhaps with the smallest 2-3 KEYSIZE values. Or take 4 KEYSIZE blocks
+    // instead of 2 and average the distances.
+    tmp.sort_by(|a, b| a.1.cmp(&b.1));
+
+    // Now that you probably know the KEYSIZE: break the ciphertext into blocks of KEYSIZE length.
+    // Now transpose the blocks: make a block that is the first byte of every block,
+    // and a block that is the second byte of every block, and so on.
+    let key_length = tmp[0].0;
+    let mut blocks = vec!();
+    for _ in 0..key_length {
+        blocks.push(vec!());
+    }
+    for (n, byte) in cipher.iter().enumerate()  {
+        blocks[n % key_length].push(byte);
+    }
+
+    // Solve each block as if it was single-character XOR. You already have code to do this.
+    // For each block, the single-byte XOR key that produces the best looking histogram is the repeating-key XOR key byte for that block. Put them together and you have the key.
+
+    tmp
 }

@@ -54,7 +54,7 @@ fn fixed_xor_panics_on_uneven_input () {
 // How? Devise some method for "scoring" a piece of English plaintext. Character frequency is a good metric. Evaluate each output and choose the one with the best score.
 #[test]
 fn find_single_byte_xor_cipher_returns_correct_value () {
-    if let Some(chi2_list) = find_single_byte_xor_cipher("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736") {
+    if let Some(chi2_list) = find_single_byte_xor_cipher(&hex::decode("1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736".to_string().to_uppercase().as_bytes()).unwrap()) {
         assert_eq!(chi2_list.text, "Cooking MC\'s like a pound of bacon");
         assert_eq!(chi2_list.key, 88);
     } else {
@@ -68,10 +68,10 @@ fn find_single_byte_xor_cipher_returns_correct_value () {
 // Find it.
 //
 // (Your code from #3 should help.)
-fn detect_single_char_xor<'a> (hashes: &[&'static str]) -> Option<Chi2Result<'a>> {
+fn detect_single_char_xor (hashes: &[&'static str]) -> Option<Chi2Result> {
     let mut result: Vec<Chi2Result> = vec!();
     for hash in hashes {
-        if let Some(best_match) = find_single_byte_xor_cipher(hash) {
+        if let Some(best_match) = find_single_byte_xor_cipher(&hex::decode(hash.to_string().to_uppercase().as_bytes()).unwrap()) {
             result.push(best_match);
         }
     }
@@ -85,7 +85,7 @@ fn detect_single_char_xor<'a> (hashes: &[&'static str]) -> Option<Chi2Result<'a>
 fn detect_single_char_xor_returns_correct_value () {
     if let Some(chi2_list) = detect_single_char_xor(&CHALLENGE_03_CONTENT) {
         assert_eq!(chi2_list.text, "Now that the party is jumping\n");
-        assert_eq!(chi2_list.hex, "7b5a4215415d544115415d5015455447414c155c46155f4058455c5b523f");
+        assert_eq!(chi2_list.data, hex::decode("7b5a4215415d544115415d5015455447414c155c46155f4058455c5b523f".to_string().to_uppercase().as_bytes()).unwrap());
         assert_eq!(chi2_list.key, 53);
     } else {
         assert!(false);
@@ -139,5 +139,5 @@ fn hamming_distance_returns_correct_value () {
 fn break_repeating_key_xor_returns_correct_value () {
     let data_bytes = base64::decode(CHALLENGE_06_CONTENT.as_bytes()).unwrap();
     let result = break_repeating_key_xor(&data_bytes, 2, 40);
-    assert_eq!(result, vec!(1));
+    assert_eq!(result, vec!((1,1)));
 }
