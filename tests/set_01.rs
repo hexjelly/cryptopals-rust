@@ -1,7 +1,10 @@
 extern crate cryptopals;
+extern crate data_encoding;
+
 mod test_data;
 
 use cryptopals::*;
+use data_encoding::base64;
 use std::cmp::Ordering;
 use test_data::{ CHALLENGE_03_CONTENT, CHALLENGE_06_CONTENT };
 
@@ -121,3 +124,14 @@ fn repeating_key_xor_returns_correct_value () {
 // Now transpose the blocks: make a block that is the first byte of every block, and a block that is the second byte of every block, and so on.
 // Solve each block as if it was single-character XOR. You already have code to do this.
 // For each block, the single-byte XOR key that produces the best looking histogram is the repeating-key XOR key byte for that block. Put them together and you have the key.
+#[test]
+fn hamming_distance_returns_correct_value () {
+    let result = hamming_distance("this is a test", "wokka wokka!!!").unwrap();
+    assert_eq!(result, 37);
+}
+
+#[test]
+fn break_repeating_key_xor_returns_correct_value () {
+    let _data_bytes = base64::decode(CHALLENGE_06_CONTENT.as_bytes()).unwrap();
+    assert_eq!(true, false);
+}

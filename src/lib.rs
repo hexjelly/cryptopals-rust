@@ -64,7 +64,7 @@ pub fn chi2 (text: String, key: u8, hex: &str) -> Chi2Result {
 }
 
 pub fn find_single_byte_xor_cipher (hex: &str) -> Option<Chi2Result> {
-    let mut analysis: Vec<Chi2Result> = vec![];
+    let mut analysis = Vec::new();
     let hex_decoded = hex::decode(hex.to_string().to_uppercase().as_bytes()).unwrap();
     for n in 32..127 {
         let mut test = hex_decoded.clone();
@@ -86,4 +86,17 @@ pub fn repeating_key_xor (data: &str, key: &str) -> String {
         result.push(b ^ *key_iter.next().unwrap());
     }
     hex::encode(&result)
+}
+
+pub fn hamming_distance (a: &str, b: &str) -> Option<usize> {
+    if a.len() != b.len() { return None; }
+    let mut result = 0;
+    for (a, b) in a.as_bytes().iter().zip(b.as_bytes().iter()) {
+        let mut val = a ^ b;
+        while val != 0 {
+            result += 1;
+            val &= val - 1;
+        }
+    }
+    Some(result)
 }
