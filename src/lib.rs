@@ -91,7 +91,7 @@ pub fn repeating_key_xor (data: &str, key: &str) -> String {
 pub fn hamming_distance (a: &str, b: &str) -> Option<usize> {
     if a.len() != b.len() { return None; }
     let mut result = 0;
-    for (a, b) in a.as_bytes().iter().zip(b.as_bytes().iter()) {
+    for (a, b) in a.bytes().zip(b.bytes()) {
         let mut val = a ^ b;
         while val != 0 {
             result += 1;
