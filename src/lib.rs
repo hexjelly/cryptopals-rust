@@ -9,18 +9,17 @@ pub fn hex_to_base64 (input_hex: &str) -> String {
     base64::encode(&hex_decoded)
 }
 
-pub fn fixed_xor (a: &str, b: &str) -> String {
+pub fn fixed_xor (a: &[u8], b: &[u8]) -> Result<Vec<u8>, String> {
     if a.len() != b.len() {
-        panic!();
+        return Err("Input not equal length.".to_string());
     }
 
-    let a = hex::decode(a.to_string().to_uppercase().as_bytes()).unwrap();
-    let b = hex::decode(b.to_string().to_uppercase().as_bytes()).unwrap();
     let mut xored = Vec::with_capacity(a.len());
-    for n in 0..a.len() {
-        xored.push(a[n] ^ b[n]);
+    for (a, b) in a.iter().zip(b.iter()) {
+        xored.push(a ^ b);
     }
-    hex::encode(&xored)
+
+    Ok(xored)
 }
 
 const LETTER_FREQUENCY: [f32; 26] = [
@@ -79,19 +78,19 @@ pub fn find_single_byte_xor_cipher (hex: &str) -> Option<Chi2Result> {
     return Some(analysis.remove(0));
 }
 
-pub fn repeating_key_xor (data: &str, key: &str) -> String {
-    let mut result = Vec::new();
-    let mut key_iter = key.as_bytes().iter().cycle();
-    for b in data.as_bytes() {
+pub fn repeating_key_xor (data: &[u8], key: &[u8]) -> Vec<u8> {
+    let mut result = vec!();
+    let mut key_iter = key.iter().cycle();
+    for b in data {
         result.push(b ^ *key_iter.next().unwrap());
     }
-    hex::encode(&result)
+    result
 }
 
-pub fn hamming_distance (a: &str, b: &str) -> Option<usize> {
+pub fn hamming_distance (a: &[u8], b: &[u8]) -> Option<usize> {
     if a.len() != b.len() { return None; }
     let mut result = 0;
-    for (a, b) in a.bytes().zip(b.bytes()) {
+    for (a, b) in a.iter().zip(b.iter()) {
         let mut val = a ^ b;
         while val != 0 {
             result += 1;
@@ -99,4 +98,12 @@ pub fn hamming_distance (a: &str, b: &str) -> Option<usize> {
         }
     }
     Some(result)
+}
+
+pub fn break_repeating_key_xor (cipher: &[u8], min_key_len: usize, max_key_len: usize) -> Vec<u8> {
+    let result = vec!();
+    for _ in min_key_len..max_key_len+1 {
+
+    }
+    result
 }

@@ -5,6 +5,7 @@ mod test_data;
 
 use cryptopals::*;
 use data_encoding::base64;
+use data_encoding::hex;
 use std::cmp::Ordering;
 use test_data::{ CHALLENGE_03_CONTENT, CHALLENGE_06_CONTENT };
 
@@ -30,14 +31,17 @@ fn hex_to_base64_returns_correct_base64_value () {
 //  746865206b696420646f6e277420706c6179
 #[test]
 fn fixed_xor_returns_correct_hex_value () {
-    let test = fixed_xor("1c0111001f010100061a024b53535009181c", "686974207468652062756c6c277320657965");
-    assert_eq!(test, "746865206b696420646f6e277420706c6179".to_string().to_uppercase());
+    let hex_1 = hex::decode("1c0111001f010100061a024b53535009181c".to_string().to_uppercase().as_bytes()).unwrap();
+    let hex_2 = hex::decode("686974207468652062756c6c277320657965".to_string().to_uppercase().as_bytes()).unwrap();
+    let result = fixed_xor(&hex_1, &hex_2).unwrap();
+    let tmp = hex::encode(&result);
+    assert_eq!(tmp, "746865206b696420646f6e277420706c6179".to_string().to_uppercase());
 }
 
 #[test]
 #[should_panic]
 fn fixed_xor_panics_on_uneven_input () {
-    let _test = fixed_xor("1c1c", "efa0c1");
+    fixed_xor(&[32, 56, 95], &[89, 42]).unwrap();
 }
 
 // Single-byte XOR cipher
@@ -101,8 +105,8 @@ fn detect_single_char_xor_returns_correct_value () {
 // Encrypt a bunch of stuff using your repeating-key XOR function. Encrypt your mail. Encrypt your password file. Your .sig file. Get a feel for it. I promise, we aren't wasting your time with this.
 #[test]
 fn repeating_key_xor_returns_correct_value () {
-    let test = repeating_key_xor("Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal", "ICE");
-    assert_eq!(test, "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272\
+    let test = repeating_key_xor("Burning 'em, if you ain't quick and nimble\nI go crazy when I hear a cymbal".as_bytes(), "ICE".as_bytes());
+    assert_eq!(hex::encode(&test), "0b3637272a2b2e63622c2e69692a23693a2a3c6324202d623d63343c2a26226324272765272\
             a282b2f20430a652e2c652a3124333a653e2b2027630c692b20283165286326302e27282f".to_string().to_uppercase());
 }
 
@@ -126,12 +130,13 @@ fn repeating_key_xor_returns_correct_value () {
 // For each block, the single-byte XOR key that produces the best looking histogram is the repeating-key XOR key byte for that block. Put them together and you have the key.
 #[test]
 fn hamming_distance_returns_correct_value () {
-    let result = hamming_distance("this is a test", "wokka wokka!!!").unwrap();
+    let result = hamming_distance("this is a test".as_bytes(), "wokka wokka!!!".as_bytes()).unwrap();
     assert_eq!(result, 37);
 }
 
 #[test]
 fn break_repeating_key_xor_returns_correct_value () {
-    let _data_bytes = base64::decode(CHALLENGE_06_CONTENT.as_bytes()).unwrap();
-    assert_eq!(true, false);
+    let data_bytes = base64::decode(CHALLENGE_06_CONTENT.as_bytes()).unwrap();
+    let result = break_repeating_key_xor(&data_bytes, 2, 40);
+    assert_eq!(result, vec!(1));
 }
