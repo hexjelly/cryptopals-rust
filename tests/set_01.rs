@@ -137,7 +137,9 @@ fn hamming_distance_returns_correct_value () {
 
 #[test]
 fn break_repeating_key_xor_returns_correct_value () {
-    let data_bytes = base64::decode(CHALLENGE_06_CONTENT.as_bytes()).unwrap();
-    let result = break_repeating_key_xor(&data_bytes, 2, 40);
-    assert_eq!(result, vec!((1,1)));
+    let data = base64::decode(CHALLENGE_06_CONTENT.as_bytes()).unwrap();
+    let key = break_repeating_key_xor(&data, 2, 40);
+    let deciphered = repeating_key_xor(&data, &key);
+    println!("{:?}", String::from_utf8(deciphered).unwrap());
+    assert_eq!(true, false);
 }

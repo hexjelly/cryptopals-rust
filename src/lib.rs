@@ -108,7 +108,7 @@ pub fn hamming_distance (a: &[u8], b: &[u8]) -> Option<usize> {
     Some(result)
 }
 
-pub fn break_repeating_key_xor (cipher: &[u8], min_key_len: usize, max_key_len: usize) -> Vec<(usize, usize)> {
+pub fn break_repeating_key_xor (cipher: &[u8], min_key_len: usize, max_key_len: usize) -> Vec<u8> {
     // For each KEYSIZE, take the first KEYSIZE worth of bytes, and the second KEYSIZE worth of bytes,
     // and find the edit distance between them. Normalize this result by dividing by KEYSIZE.
     let mut tmp = vec!();
@@ -130,11 +130,16 @@ pub fn break_repeating_key_xor (cipher: &[u8], min_key_len: usize, max_key_len: 
         blocks.push(vec!());
     }
     for (n, byte) in cipher.iter().enumerate()  {
-        blocks[n % key_length].push(byte);
+        blocks[n % key_length].push(*byte);
     }
 
     // Solve each block as if it was single-character XOR. You already have code to do this.
-    // For each block, the single-byte XOR key that produces the best looking histogram is the repeating-key XOR key byte for that block. Put them together and you have the key.
+    // For each block, the single-byte XOR key that produces the best looking histogram is the
+    // repeating-key XOR key byte for that block. Put them together and you have the key.
+    let mut result = vec!();
+    for block in blocks {
+        result.push(find_single_byte_xor_cipher(&block).unwrap().key);
+    }
 
-    tmp
+    result
 }
