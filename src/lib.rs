@@ -44,9 +44,9 @@ pub fn chi2 (text: &str) -> f32 {
     for byte in text.as_bytes() {
         if *byte >= 65_u8 && *byte <= 90_u8 { count[(byte - 65) as usize] += 1 }
         else if *byte >= 97_u8 && *byte <= 122_u8 { count[(byte - 97) as usize] += 1 }
-        else if *byte >= 32_u8 && *byte <= 126_u8 { ignored += 1 }
-        else if *byte == 9_u8 || *byte == 10_u8 || *byte == 13_u8 { ignored += 1 }
-        else { ignored += 1 }
+        else if *byte >= 33_u8 && *byte <= 126_u8 { ignored += 2 }
+        else if *byte == 32 || *byte == 9_u8 || *byte == 10_u8 || *byte == 13_u8 { ignored += 1 }
+        else { ignored += 10 }
     }
 
     let length = text.len() + ignored * 5;

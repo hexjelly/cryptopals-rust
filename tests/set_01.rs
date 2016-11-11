@@ -140,6 +140,6 @@ fn break_repeating_key_xor_returns_correct_value () {
     let data = base64::decode(CHALLENGE_06_CONTENT.as_bytes()).unwrap();
     let key = break_repeating_key_xor(&data, 2, 40);
     let deciphered = repeating_key_xor(&data, &key);
-    println!("{:?}", String::from_utf8(deciphered).unwrap());
-    assert_eq!(true, false);
+    println!("key: {:?} = {:?}", key, &String::from_utf8(deciphered).unwrap()[0..30]);
+    panic!();
 }
