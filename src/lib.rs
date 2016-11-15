@@ -114,13 +114,13 @@ pub fn break_repeating_key_xor (cipher: &[u8], min_key_len: usize, max_key_len: 
     // and find the edit distance between them. Normalize this result by dividing by KEYSIZE.
     let mut tmp = vec!();
     for n in min_key_len..max_key_len+1 {
-        let distance = (n, hamming_distance(&cipher[0..n], &cipher[n..n * 2]).unwrap() / n);
+        let distance = (n, hamming_distance(&cipher[0..n], &cipher[n..n * 2]).unwrap() as f32 / n as f32);
         tmp.push(distance);
     }
     // The KEYSIZE with the smallest normalized edit distance is probably the key.
     // You could proceed perhaps with the smallest 2-3 KEYSIZE values. Or take 4 KEYSIZE blocks
     // instead of 2 and average the distances.
-    tmp.sort_by(|a, b| a.1.cmp(&b.1));
+    tmp.sort_by(|a, b| a.1.partial_cmp(&b.1).unwrap());
 
     // Now that you probably know the KEYSIZE: break the ciphertext into blocks of KEYSIZE length.
     // Now transpose the blocks: make a block that is the first byte of every block,
