@@ -22,11 +22,11 @@ pub fn fixed_xor (a: &[u8], b: &[u8]) -> Result<Vec<u8>, String> {
     Ok(xored)
 }
 
-const LETTER_FREQUENCY: [f32; 26] = [
+const LETTER_FREQUENCY: [f32; 27] = [
     0.08167, 0.01492, 0.02782, 0.04253, 0.12702, 0.02228, 0.02015,
     0.06094, 0.06966, 0.00153, 0.00772, 0.04025, 0.02406, 0.06749,
     0.07507, 0.01929, 0.00095, 0.05987, 0.06327, 0.09056, 0.02758,
-    0.00978, 0.02360, 0.00150, 0.01974, 0.00074];
+    0.00978, 0.02360, 0.00150, 0.01974, 0.00074, 0.20987];
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Chi2Result {
@@ -38,21 +38,22 @@ pub struct Chi2Result {
 
 
 pub fn chi2 (text: &str) -> f32 {
-    let mut count = [0;26];
+    let mut count = [0;27];
     let mut ignored = 0;
 
     for byte in text.as_bytes() {
         if *byte >= 65_u8 && *byte <= 90_u8 { count[(byte - 65) as usize] += 1 }
         else if *byte >= 97_u8 && *byte <= 122_u8 { count[(byte - 97) as usize] += 1 }
-        else if *byte >= 33_u8 && *byte <= 126_u8 { ignored += 2 }
-        else if *byte == 32 || *byte == 9_u8 || *byte == 10_u8 || *byte == 13_u8 { ignored += 1 }
+        else if *byte == 32 { count[26] += 1 }
+        else if *byte >= 33_u8 && *byte <= 126_u8 { ignored += 1 }
+        else if *byte == 9_u8 || *byte == 10_u8 || *byte == 13_u8 { ignored += 1 }
         else { ignored += 10 }
     }
 
-    let length = text.len() + ignored * 5;
+    let length = text.len() + ignored;
     let mut result = 0.;
 
-    for n in 0..26 {
+    for n in 0..27 {
         let found = count[n];
         let expected = length as f32 * LETTER_FREQUENCY[n];
         let diff = found as f32 - expected;
@@ -64,17 +65,17 @@ pub fn chi2 (text: &str) -> f32 {
 
 pub fn find_single_byte_xor_cipher (input: &[u8]) -> Option<Chi2Result> {
     let mut analysis = Vec::new();
-    for n in 32..127 {
+    for n in 0..256 as usize {
         let mut tmp = input.to_vec();
         for b in tmp.iter_mut() {
-            *b ^= n;
+            *b ^= n as u8;
         }
         let string = String::from_utf8(tmp);
         if string.is_ok() {
             let string = string.unwrap();
             analysis.push(Chi2Result {
                 text: string.clone(),
-                key: n,
+                key: n as u8,
                 chi2: chi2(&string),
                 data: input.to_vec()
             });
