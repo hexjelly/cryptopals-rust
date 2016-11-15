@@ -67,7 +67,7 @@ pub fn find_single_byte_xor_cipher (input: &[u8]) -> Option<Chi2Result> {
     let mut analysis = Vec::new();
     for n in 0..256 as usize {
         let mut tmp = input.to_vec();
-        for b in tmp.iter_mut() {
+        for b in &mut tmp {
             *b ^= n as u8;
         }
         let string = String::from_utf8(tmp);
