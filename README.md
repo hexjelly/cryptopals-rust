@@ -10,7 +10,7 @@ Attempt to work through the [cryptopals](http://cryptopals.com/) challenges in R
 - [x] Single-byte XOR cipher
 - [x] Detect single-character XOR
 - [x] Implement repeating-key XOR
-- [ ] Break repeating-key XOR
+- [x] Break repeating-key XOR
 - [ ] AES in ECB mode
 - [ ] Detect AES in ECB mode
 
