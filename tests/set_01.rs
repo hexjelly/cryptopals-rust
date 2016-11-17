@@ -1,5 +1,6 @@
 extern crate cryptopals;
 extern crate data_encoding;
+extern crate crypto;
 
 mod test_data;
 
@@ -7,7 +8,8 @@ use cryptopals::*;
 use data_encoding::base64;
 use data_encoding::hex;
 use std::cmp::Ordering;
-use test_data::{ CHALLENGE_03_CONTENT, CHALLENGE_06_CONTENT };
+use test_data::*;
+use crypto::{ buffer, aes, blockmodes };
 
 // Convert hex to base64
 // The string:
@@ -142,4 +144,28 @@ fn break_repeating_key_xor_returns_correct_value () {
     let deciphered = repeating_key_xor(&data, &key);
     assert_eq!(key, b"Terminator X: Bring the noise");
     assert_eq!(deciphered[0..35], b"I'm back and I'm ringin' the bell \n"[..]);
+}
+
+// AES in ECB mode
+// The Base64-encoded content in this file has been encrypted via AES-128 in ECB mode under the key
+//
+// "YELLOW SUBMARINE".
+// (case-sensitive, without the quotes; exactly 16 characters; I like "YELLOW SUBMARINE" because it's
+// exactly 16 bytes long, and now you do too).
+//
+// Decrypt it. You know the key, after all.
+//
+// Easiest way: use OpenSSL::Cipher and give it AES-128-ECB as the cipher.
+#[test]
+fn aes_in_ecb_mode () {
+    let data = base64::decode(CHALLENGE_07_CONTENT.as_bytes()).unwrap();
+    let key = b"YELLOW SUBMARINE";
+    let mut decrypted = vec!(0u8; data.len());
+    let mut decryptor = aes::ecb_decryptor(aes::KeySize::KeySize128, key, blockmodes::NoPadding);
+    {
+        let mut encrypted_buffer = buffer::RefReadBuffer::new(&data);
+        let mut decrypted_buffer = buffer::RefWriteBuffer::new(decrypted.as_mut_slice());
+        decryptor.decrypt(&mut encrypted_buffer, &mut decrypted_buffer, true).unwrap();
+    }
+    assert_eq!(decrypted[0..33], b"I'm back and I'm ringin' the bell"[..]);
 }

@@ -5,3 +5,4 @@ authors = ["Roger Andersen <hexjelly@hexjelly.com>"]
 
 [dependencies]
 data-encoding = "1.1.2"
+rust-crypto = "^0.2"
